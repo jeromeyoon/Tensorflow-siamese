@@ -67,6 +67,9 @@ y_train = mnist.train._labels
 X_test = mnist.test._images
 y_test = mnist.test._labels
 batch_size =128
+global_step = tf.Variable(0,trainable=False)
+starter_learning_rate = 0.001
+learning_rate = tf.train.exponential_decay(starter_learning_rate,global_step,10,0.1,staircase=True)
 # create training+test positive and negative pairs
 digit_indices = [np.where(y_train == i)[0] for i in range(10)]
 tr_pairs, tr_y = create_pairs(X_train, digit_indices)
@@ -96,8 +99,7 @@ with tf.Session() as sess:
     #sess.run(init)
     tf.initialize_all_variables().run()
     # Training cycle
-    for epoch in range(100):
-        print('epoch %d' % epoch)
+    for epoch in range(30):
         avg_loss = 0.
         avg_acc = 0.
         total_batch = int(X_train.shape[0]/batch_size)
@@ -129,4 +131,4 @@ with tf.Session() as sess:
     predict=distance.eval(feed_dict={images_L:te_pairs[:,0],images_R:te_pairs[:,1],labels:y,dropout_f:1.0})
     y = np.reshape(te_y,(te_y.shape[0],1))
     te_acc = compute_accuracy(predict,y)
-    print('Accuract training set %0.2f' % (100 * te_acc))
+    print('Accuract test set %0.2f' % (100 * te_acc))
